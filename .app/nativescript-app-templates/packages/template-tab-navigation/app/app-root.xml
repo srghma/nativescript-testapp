@@ -1,0 +1,13 @@
+<TabView androidTabsPosition="bottom">
+    <TabViewItem title="Home" >
+        <Frame defaultPage="home/home-items-page" />
+    </TabViewItem>
+
+    <TabViewItem title="Browse" >
+        <Frame defaultPage="browse/browse-page" />
+    </TabViewItem>
+
+    <TabViewItem title="Search" >
+        <Frame defaultPage="search/search-page" />
+    </TabViewItem>
+</TabView>

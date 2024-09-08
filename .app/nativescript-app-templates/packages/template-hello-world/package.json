@@ -1,0 +1,43 @@
+{
+  "name": "@nativescript/template-hello-world",
+  "main": "app/app.js",
+  "version": "8.0.4",
+  "author": "NativeScript Team <oss@nativescript.org>",
+  "description": "Nativescript hello-world project template",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "app",
+    "App_Resources",
+    "hooks",
+    "tools",
+    "!tools/assets",
+    ".editorconfig",
+    "jsconfig.json"
+  ],
+  "keywords": [
+    "nstudio",
+    "nativescript",
+    "mobile",
+    "{N}",
+    "tns",
+    "template"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NativeScript/nativescript-app-templates"
+  },
+  "bugs": {
+    "url": "https://github.com/NativeScript/NativeScript/issues"
+  },
+  "homepage": "https://github.com/NativeScript/nativescript-app-templates",
+  "dependencies": {
+    "@nativescript/core": "~8.0.0",
+    "@nativescript/theme": "~3.0.1"
+  },
+  "devDependencies": {
+    "@nativescript/webpack": "beta"
+  }
+}

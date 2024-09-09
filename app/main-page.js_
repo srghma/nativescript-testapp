@@ -22,3 +22,7 @@ export function createViewModel() {
   return viewModel
 }
 
+export function onNavigatingTo(args) {
+  const page = args.object
+  page.bindingContext = createViewModel()
+}

@@ -75,11 +75,5 @@
 #   config.allowUnfree = true;
 # }
 
-
-# avdmanager create avd -n myEmulator -k "system-images;android-34;google_apis;x86_64"
-# emulator -avd myEmulator
-
-# or
-
 # avdmanager create avd -n myEmulatorFromNixpkgs -k "system-images;android-34-ext10;google_apis_playstore;x86_64"
 # emulator -avd myEmulatorFromNixpkgs

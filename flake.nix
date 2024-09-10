@@ -6,7 +6,6 @@
     devshell.url = "github:numtide/devshell";
     devshell.inputs.nixpkgs.follows = "nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
-    flake-utils.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = {
@@ -15,7 +14,10 @@
     devshell,
     flake-utils,
   }:
-    flake-utils.lib.eachSystem [ "aarch64-darwin" "x86_64-darwin" "x86_64-linux" ] (system:
+    {
+      pkgs = import nixpkgs { config = { }; overlays = [ ]; system = "x86_64-linux"; };
+    } //
+    flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
       let
         inherit (nixpkgs) lib;
         pkgs = import nixpkgs {
@@ -39,9 +41,7 @@
           abiVersions = [ "x86_64" ];
           includeNDK = true;
           useGoogleAPIs = true;
-          includeExtras = [
-            "extras;google;gcm"
-          ];
+          includeExtras = [ "extras;google;gcm" ];
         };
         myandroid-studio = pkgs.android-studio.withSdk androidComposition.androidsdk;
       in
@@ -57,6 +57,7 @@
             { name = "PATH"; prefix = "/home/srghma/projects/nativescript-cli/bin/"; }
           ];
           packages = with pkgs; [
+            arion
             gradle
             jdk
             nodejs_22

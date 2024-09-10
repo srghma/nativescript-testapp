@@ -8,10 +8,7 @@ in
 
 config.mkScripts {
   dev__cat = ''
-    arion \
-      --file docker/import.nix \
-      --pkgs nix/pkgs.nix \
-      cat
+    arion --file docker/import.nix cat
   '';
 
   dev__down = ''

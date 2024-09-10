@@ -1,0 +1,58 @@
+
+
+\set role     $$'app_owner'$$
+\set user_id  $$'00000000-0000-0000-0000-000000000001'$$
+\set email    $$'user@mail.com'$$
+\set password $$'secret_pass'$$
+
+begin;
+
+select no_plan();
+
+insert into app_public.users
+  (id, email, first_name, last_name, is_confirmed, password_hash)
+  values
+  (:user_id, :email, random_string(), random_string(), true, crypt(:password, gen_salt('bf')));
+
+-- Spy on function
+
+create temp table rabbitmq__send_confirmation_mail__calls(
+  arguments json
+);
+
+grant select on table rabbitmq__send_confirmation_mail__calls to app_user, app_owner;
+
+create or replace function app_private.rabbitmq__send_confirmation_mail(a_user app_public.users) returns void as $$
+begin
+  insert into rabbitmq__send_confirmation_mail__calls (arguments) values (row_to_json($1));
+end;
+$$ language plpgsql volatile set search_path from current;
+
+-- Spy on function END
+
+
+-- Test body
+set local role :role;
+select is(current_user, :role);
+
+prepare do_stuff as
+  select app_public.resend_confirmation(:email);
+
+select throws_ok(
+  'do_stuff',
+  'APP_EXCEPTION__RESEND_CONFIRMATION__ALREADY_CONFIRMED'
+);
+
+-- Test body END
+
+-- Check function hasn't been called
+
+set local role 'app_owner';
+
+select
+  is(count(*), 0::bigint)
+from rabbitmq__send_confirmation_mail__calls;
+
+select finish();
+
+rollback;

@@ -1,0 +1,19 @@
+create or replace function randomly_set_empty_jwt_user_id() returns void as $function$
+declare
+  /* rand integer := random_between(0, 3); */
+  rand integer := 1;
+begin
+  case
+  when rand = 0 then
+    null;
+  when rand = 1 then
+    set local jwt.claims.user_id to default;
+  when rand = 2 then
+    set local jwt.claims.user_id to '';
+  when rand = 3 then
+    set local jwt.claims.user_id to random_string();
+  end case;
+end;
+$function$ LANGUAGE plpgsql;
+
+select randomly_set_empty_jwt_user_id();

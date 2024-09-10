@@ -46,7 +46,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
   CREATE DATABASE ${DATABASE_NAME} OWNER app_owner;
   ${maybeRevokePublic}
   GRANT CONNECT ON DATABASE ${DATABASE_NAME} TO app_owner;
-  GRANT CONNECT ON DATABASE ${DATABASE_NAME} TO app_anonymous;
+ aGRANT CONNECT ON DATABASE ${DATABASE_NAME} TO app_anonymous;
   GRANT ALL ON DATABASE ${DATABASE_NAME} TO app_owner;
 
   # Some extensions require superuser privileges, so we create them before migration time.

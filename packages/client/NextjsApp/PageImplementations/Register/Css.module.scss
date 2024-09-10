@@ -1,0 +1,34 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  max-width: 30%;
+  min-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.logo {
+  max-width: 45%;
+  min-width: 200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.buttons__button {
+  margin-left: 10px;
+}
+
+.input {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: 10px;
+}

@@ -1,0 +1,36 @@
+
+\set schema $$'app_public'$$
+\set func $$'reset_password'$$
+\set args $$'{"text","text"}'$$::text[]
+
+begin;
+
+select no_plan();
+
+SELECT function_privs_are(
+  :schema,
+  :func,
+  :args,
+  'app_owner',
+  '{"EXECUTE"}'
+);
+
+SELECT function_privs_are(
+  :schema,
+  :func,
+  :args,
+  'app_user',
+  '{"EXECUTE"}'
+);
+
+SELECT function_privs_are(
+  :schema,
+  :func,
+  :args,
+  'app_owner',
+  '{"EXECUTE"}'
+);
+
+select finish();
+
+rollback;

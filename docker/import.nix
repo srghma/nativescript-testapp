@@ -1,13 +1,12 @@
 { pkgs, ... }:
 
-with pkgs;
-
 let
+  inherit (pkgs) rootProjectDir;
+
   mkInitDbScript = import ./utils/mkInitDbScript.nix { inherit pkgs; };
 
-  rootProjects = import "${rootProjectDir}/default.nix" { inherit pkgs; };
-
-  inherit (rootProjects) rootYarnModules;
+  # rootProjects = import "${rootProjectDir}/default.nix" { inherit pkgs; };
+  # inherit (rootProjects) rootYarnModules;
 in
 
 {
@@ -20,9 +19,9 @@ in
   };
 
   services = {
-    pgadmin = {
-      service = import ./common/pgadmin.nix {};
-    };
+    # pgadmin = {
+    #   service = import ./common/pgadmin.nix {};
+    # };
 
     postgres = {
       service =
@@ -36,7 +35,7 @@ in
 
           environment = {
             # for ./utils/mkInitDbScript.sh
-            IS_PRODUCTION = false;
+            IS_PRODUCTION = "false";
             inherit (import "${rootProjectDir}/config/public/database.nix") DATABASE_NAME;
             inherit (import "${rootProjectDir}/config/ignored/passwords.nix") DATABASE_OWNER_PASSWORD DATABASE_ANONYMOUS_PASSWORD;
 

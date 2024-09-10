@@ -1,0 +1,26 @@
+readStdin :: Aff String
+readStdin = makeAff \callback -> do
+  ref <- Ref.new ""
+  Node.Stream.onDataString Node.Process.stdin Node.Encoding.UTF8 \s -> do
+    buffer <- Ref.read ref
+    Ref.write (buffer <> s) ref
+  Node.Stream.onEnd Node.Process.stdin do
+    buffer <- Ref.read ref
+    callback (pure buffer)
+  pure nonCanceler
+
+readEndStdin :: Aff Unit
+readEndStdin = makeAff \callback -> do
+  Node.Stream.onEnd Node.Process.stdin do
+     traceM "end"
+     callback $ Right unit
+  pure nonCanceler
+
+writeStdout :: String -> Effect Unit
+writeStdout s =
+  void (Node.Stream.writeString Node.Process.stdout Node.Encoding.UTF8 s (pure unit))
+
+pressCtrlDToContinue :: Aff Unit
+pressCtrlDToContinue = do
+  liftEffect $ writeStdout "Press \"CTRL-D\" to continue: "
+  readEndStdin

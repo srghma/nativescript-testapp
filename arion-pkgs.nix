@@ -10,4 +10,4 @@ flake-compat = builtins.fetchTarball {
   sha256 = narHash;
 };
 in
-flake.pkgs
+flake.pkgs // { rootProjectDir = builtins.toString ./.; }

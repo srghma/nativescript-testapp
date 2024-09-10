@@ -1,0 +1,51 @@
+
+\set user_id        $$'00000000-0000-0000-0000-000000000001'$$
+\set old_first_name $$'old_first_name'$$
+\set old_last_name  $$'old_last_name'$$
+
+\set service            $$'facebook'$$
+\set service_identifier $$'0000000000000000'$$
+\set email              $$'user@mail.com'$$
+\set new_first_name     $$'new_first_name'$$
+\set new_last_name      $$'new_last_name'$$
+\set avatar_url         $$'http://asfdasdf.com/asdf'$$
+
+begin;
+
+select no_plan();
+
+insert into app_public.users
+  (id, email, first_name, last_name)
+  values
+  (:user_id, :email, :old_first_name, :old_last_name);
+
+select set_eq('select count(*) from app_public.users', array[1]);
+select set_eq('select count(*) from app_public.user_oauths', array[0]);
+
+prepare actual as
+  select app_private.web_login_or_register_oauth(
+    :service,
+    :service_identifier,
+    :email,
+    :new_first_name,
+    :new_last_name,
+    :avatar_url
+  );
+
+prepare expected as values
+  (('app_owner', :user_id)::app_public.jwt);
+
+select set_eq(
+  'actual',
+  'expected'
+);
+
+select set_eq('select count(*) from app_public.users', array[1]);
+select set_eq('select count(*) from app_public.user_oauths', array[1]);
+
+select set_eq('select first_name from app_public.users', array[:old_first_name]);
+select set_eq('select last_name from app_public.users',  array[:old_last_name]);
+
+select finish();
+
+rollback;

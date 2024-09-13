@@ -6,12 +6,11 @@ import { NhostClient } from '@nhost/nhost-js'
 import Cookies from 'js-cookie'
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
-
-const NHOST_SESSION_KEY = 'nhostSession'
+import { NHOST_SESSION_KEY } from '@utils/nhost'
 
 const nhost = new NhostClient({
   subdomain: process.env.NEXT_PUBLIC_NHOST_SUBDOMAIN || 'local',
-  region: process.env.NEXT_PUBLIC_NHOST_REGION
+  region: process.env.NEXT_PUBLIC_NHOST_REGION || 'local'
 })
 
 export default function SignInWithSecurityKey() {

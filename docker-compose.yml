@@ -86,8 +86,7 @@ services:
       # docker cp nativescript-testapp-hasura-1:/tmp/hasura-project ./hasura-project
 
       - ./nhost-backend/nhost/migrations:/hasura-migrations
-      # - ./nhost-backend/nhost/metadata:/hasura-metadata
-      # - ./hasura-project/metadata:/hasura-metadata
+      - ./nhost-backend/nhost/metadata:/hasura-metadata
     healthcheck:
       test:
         - CMD-SHELL

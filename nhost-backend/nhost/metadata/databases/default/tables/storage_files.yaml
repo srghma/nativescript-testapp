@@ -13,8 +13,6 @@ configuration:
       custom_name: id
     is_uploaded:
       custom_name: isUploaded
-    metadata:
-      custom_name: metadata
     mime_type:
       custom_name: mimeType
     name:
@@ -31,7 +29,6 @@ configuration:
     etag: etag
     id: id
     is_uploaded: isUploaded
-    metadata: metadata
     mime_type: mimeType
     name: name
     size: size
@@ -52,3 +49,59 @@ object_relationships:
   - name: bucket
     using:
       foreign_key_constraint_on: bucket_id
+insert_permissions:
+  - role: public
+    permission:
+      check: {}
+      columns:
+        - id
+        - created_at
+        - updated_at
+        - bucket_id
+        - name
+        - size
+        - mime_type
+        - etag
+        - is_uploaded
+        - uploaded_by_user_id
+        - metadata
+  - role: user
+    permission:
+      check: {}
+      columns:
+        - bucket_id
+        - id
+        - is_uploaded
+        - mime_type
+        - name
+        - size
+select_permissions:
+  - role: public
+    permission:
+      columns:
+        - id
+        - created_at
+        - updated_at
+        - bucket_id
+        - name
+        - size
+        - mime_type
+        - etag
+        - is_uploaded
+        - uploaded_by_user_id
+        - metadata
+      filter: {}
+  - role: user
+    permission:
+      columns:
+        - is_uploaded
+        - size
+        - bucket_id
+        - etag
+        - mime_type
+        - name
+        - created_at
+        - updated_at
+        - id
+        - uploaded_by_user_id
+      filter: {}

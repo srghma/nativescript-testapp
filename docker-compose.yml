@@ -1,23 +1,27 @@
 services:
   traefik:
     image: traefik:latest
-    container_name: 'traefik'
+    container_name: "traefik"
     command:
-      - '--api.insecure=true'
-      - '--providers.docker=true'
-      - '--providers.docker.exposedbydefault=false'
-      - '--entrypoints.web.address=:1337'
-      - '--entryPoints.admin.address=:3030'
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:1337"
+      - "--entryPoints.admin.address=:3030"
     ports:
       # hasura/services
-      - '1337:1337'
-      # traefik interface
-      - '9090:8080'
+      - "1337:1337"
+      # traefik interface http://localhost:9090/dashboard/#/
+      - "9090:8080"
       # dashboard
-      - '3030:3030'
+      - "3030:3030"
     volumes:
-      - '/var/run/docker.sock:/var/run/docker.sock:ro'
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
+  # -- hostname - postgres (yes, pgadmin4 client reaches postgres through pgadmin4 server, you dont need to expose $POSTGRES_PORT port)
+  # -- username - $POSTGRES_USER or postgres
+  # -- password - $POSTGRES_PASSWORD
   pgadmin:
     image: dpage/pgadmin4:latest
     ports:
@@ -25,8 +29,8 @@ services:
     depends_on:
       - "postgres"
     environment:
-      PGADMIN_DEFAULT_EMAIL: "foo"
-      PGADMIN_DEFAULT_PASSWORD: "foo"
+      PGADMIN_DEFAULT_EMAIL: "pgadmin@email.com"
+      PGADMIN_DEFAULT_PASSWORD: "change-me"
 
   postgres:
     image: postgres:latest
@@ -38,23 +42,52 @@ services:
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - '5432:5432'
+      - "5432:5432"
 
   hasura:
     image: hasura/graphql-engine:latest.cli-migrations-v3
     depends_on:
-      - 'postgres'
+      - "postgres"
     restart: always
     expose:
       - 8080
+      - 9691
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres
       HASURA_GRAPHQL_JWT_SECRET: ${HASURA_GRAPHQL_JWT_SECRET}
       HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
       HASURA_GRAPHQL_UNAUTHORIZED_ROLE: public
       HASURA_GRAPHQL_LOG_LEVEL: debug
-      HASURA_GRAPHQL_ENABLE_CONSOLE: 'true'
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: "startup, http-log, webhook-log, websocket-log, query-log"
+      HASURA_GRAPHQL_ENABLE_ALLOWLIST: "true"
+      HASURA_GRAPHQL_ENABLE_REMOTE_SCHEMA_PERMISSIONS: "true"
+      HASURA_GRAPHQL_CORS_DOMAIN: "*"
+      HASURA_GRAPHQL_ENABLED_APIS: "metadata,graphql,pgdump,config"
+    volumes:
+      ## docker exec -it nativescript-testapp-hasura-1 bash
+      ## hasura-cli init demo-project --endpoint https://docs-demo.hasura.app --admin-secret mySecret
+      ## docker cp nativescript-testapp-hasura-1:/demo-project ./hasura-project
+      #
+      # hasura-cli metadata export
+      #
+
+      # TEMP_PROJECT_DIR="/tmp/hasura-project"
+      # HASURA_GRAPHQL_MIGRATIONS_SERVER_PORT=8080
+      # rm -rf "$TEMP_PROJECT_DIR"
+      # mkdir -p "$TEMP_PROJECT_DIR"
+      # cd "$TEMP_PROJECT_DIR"
+      # echo "version: 3" > config.yaml
+      # echo "endpoint: http://localhost:$HASURA_GRAPHQL_MIGRATIONS_SERVER_PORT" >> config.yaml
+      # echo "metadata_directory: metadata" >> config.yaml
+      # hasura-cli metadata export
+      #
+      # rm -rdf ./hasura-project
+      # docker cp nativescript-testapp-hasura-1:/tmp/hasura-project ./hasura-project
+
+      - ./nhost-backend/nhost/migrations:/hasura-migrations
+      # - ./nhost-backend/nhost/metadata:/hasura-metadata
+      # - ./hasura-project/metadata:/hasura-metadata
     healthcheck:
       test:
         - CMD-SHELL
@@ -63,9 +96,9 @@ services:
       interval: 30s
       start_period: 90s
     labels:
-      - 'traefik.enable=true'
-      - 'traefik.http.routers.hasura.rule=Host(`${PROXY_HOST}`) && PathPrefix(`/`)'
-      - 'traefik.http.routers.hasura.entrypoints=web'
+      - "traefik.enable=true"
+      - "traefik.http.routers.hhhhh.rule=Host(`${PROXY_HOST}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.hhhhh.entrypoints=web"
 
   auth:
     image: nhost/hasura-auth:0.24
@@ -76,12 +109,22 @@ services:
     volumes:
       - ./emails:/app/email-templates
     environment:
-      AUTH_HOST: '0.0.0.0'
+      # AUTH_ENABLE_CHANGE_ENV: "true"
+      # AUTH_API_PREFIX: ""
+      # AUTH_PORT: 4000
+      # AUTH_USER_DEFAULT_ALLOWED_ROLES: 'me,user,editor'
+      # AUTH_SMTP_AUTH_METHOD: PLAIN
+      # AUTH_SMTP_SECURE: "false"
+      # AUTH_LOG_LEVEL: debug
+      # AUTH_LOG_FORMAT_TEXT: 'true'
+      # AUTH_EMAIL_SIGNIN_EMAIL_VERIFIED_REQUIRED: 'false'
+
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres
       HASURA_GRAPHQL_GRAPHQL_URL: http://hasura:8080/v1/graphql
       HASURA_GRAPHQL_JWT_SECRET: ${HASURA_GRAPHQL_JWT_SECRET}
       HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
-      AUTH_CLIENT_URL: ${AUTH_CLIENT_URL:-http://localhost:3000}
+      AUTH_CLIENT_URL: ${AUTH_CLIENT_URL}
+      AUTH_SERVER_URL: http://localhost:1337/v1/auth # as from outside
       AUTH_SMTP_HOST: mailhog
       AUTH_SMTP_PORT: 1025
       AUTH_SMTP_USER: user
@@ -89,12 +132,14 @@ services:
       AUTH_SMTP_SENDER: mail@example.com
     expose:
       - 4000
+    # ports:
+    #   - 4000:4000
     labels:
-      - 'traefik.enable=true'
-      - 'traefik.http.middlewares.strip-auth.stripprefix.prefixes=/v1/auth'
-      - 'traefik.http.routers.auth.rule=Host(`${PROXY_HOST}`) && PathPrefix(`/v1/auth`)'
-      - 'traefik.http.routers.auth.middlewares=strip-auth@docker'
-      - 'traefik.http.routers.auth.entrypoints=web'
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.strip-auth.stripprefix.prefixes=/v1/auth"
+      - "traefik.http.routers.auth.rule=Host(`${PROXY_HOST}`) && PathPrefix(`/v1/auth`)"
+      - "traefik.http.routers.auth.middlewares=strip-auth@docker"
+      - "traefik.http.routers.auth.entrypoints=web"
 
   storage:
     image: nhost/hasura-storage:0.6.2-beta0
@@ -106,34 +151,34 @@ services:
     expose:
       - 8000
     environment:
-      PUBLIC_URL:                  ${PROXY_URL}
-      HASURA_METADATA:             1
-      HASURA_ENDPOINT:             http://hasura:8080/v1
+      PUBLIC_URL: ${PROXY_URL}
+      HASURA_METADATA: 1
+      HASURA_ENDPOINT: http://hasura:8080/v1
       HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
-      S3_ACCESS_KEY:               ${STORAGE_ACCESS_KEY}
-      S3_SECRET_KEY:               ${STORAGE_SECRET_KEY}
-      S3_ENDPOINT:                 http://minio:8484
-      S3_BUCKET:                   nhost
-      POSTGRES_MIGRATIONS:         1
-      POSTGRES_MIGRATIONS_SOURCE:  postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres?sslmode=disable
+      S3_ACCESS_KEY: ${STORAGE_ACCESS_KEY}
+      S3_SECRET_KEY: ${STORAGE_SECRET_KEY}
+      S3_ENDPOINT: http://minio:8484
+      S3_BUCKET: nhost
+      POSTGRES_MIGRATIONS: 1
+      POSTGRES_MIGRATIONS_SOURCE: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres?sslmode=disable
     labels:
-      - 'traefik.enable=true'
-      - 'traefik.http.routers.storage.rule=Host(`${PROXY_HOST}`) && PathPrefix(`/v1/storage`)'
-      - 'traefik.http.routers.storage.entrypoints=web'
+      - "traefik.enable=true"
+      - "traefik.http.routers.storage.rule=Host(`${PROXY_HOST}`) && PathPrefix(`/v1/storage`)"
+      - "traefik.http.routers.storage.entrypoints=web"
       # Rewrite the path so it matches with the new storage API path introduced in hasura-storage 0.2
-      - 'traefik.http.middlewares.strip-suffix.replacepathregex.regex=^/v1/storage/(.*)'
-      - 'traefik.http.middlewares.strip-suffix.replacepathregex.replacement=/v1/$$1'
-      - 'traefik.http.routers.storage.middlewares=strip-suffix@docker'
+      - "traefik.http.middlewares.strip-suffix.replacepathregex.regex=^/v1/storage/(.*)"
+      - "traefik.http.middlewares.strip-suffix.replacepathregex.replacement=/v1/$$1"
+      - "traefik.http.routers.storage.middlewares=strip-suffix@docker"
     command: serve
 
   functions:
     image: nhost/functions:latest
     labels:
-      - 'traefik.enable=true'
-      - 'traefik.http.middlewares.strip-functions.stripprefix.prefixes=/v1/functions'
-      - 'traefik.http.routers.functions.rule=Host(`${PROXY_HOST}`) && PathPrefix(`/v1/functions`)'
-      - 'traefik.http.routers.functions.middlewares=strip-functions@docker'
-      - 'traefik.http.routers.functions.entrypoints=web'
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.strip-functions.stripprefix.prefixes=/v1/functions"
+      - "traefik.http.routers.functions.rule=Host(`${PROXY_HOST}`) && PathPrefix(`/v1/functions`)"
+      - "traefik.http.routers.functions.middlewares=strip-functions@docker"
+      - "traefik.http.routers.functions.entrypoints=web"
     restart: always
     expose:
       - 3000
@@ -163,7 +208,7 @@ services:
       SMTP_PORT: ${AUTH_SMTP_PORT:-1025}
       SMTP_PASS: ${AUTH_SMTP_PASS:-password}
       SMTP_USER: ${AUTH_SMTP_USER:-user}
-      SMTP_SECURE: '${AUTH_SMTP_SECURE:-false}'
+      SMTP_SECURE: "${AUTH_SMTP_SECURE:-false}"
       SMTP_SENDER: ${AUTH_SMTP_SENDER:-hbp@hbp.com}
     ports:
       - ${AUTH_SMTP_PORT:-1025}:1025
@@ -186,9 +231,9 @@ services:
     expose:
       - 3000
     labels:
-      - 'traefik.enable=true'
-      - 'traefik.http.routers.nhost.rule=Host(`${NHOST_HOST}`)'
-      - 'traefik.http.routers.nhost.entrypoints=admin'
+      - "traefik.enable=true"
+      - "traefik.http.routers.nhost.rule=Host(`${NHOST_HOST}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.nhost.entrypoints=admin"
       # If you would like to protect your dashboard with a username and password if it is publicly-facing, uncomment and fill in the following lines below according to the documentation at https://doc.traefik.io/traefik/middlewares/http/basicauth/
       #- "traefik.http.routers.nhost.middlewares=auth"
       #- "traefik.http.middlewares.auth.basicauth.users=

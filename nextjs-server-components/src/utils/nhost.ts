@@ -2,8 +2,8 @@ import { AuthErrorPayload, NhostClient, NhostSession } from '@nhost/nhost-js'
 import { cookies } from 'next/headers'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { type StateFrom } from 'xstate/lib/types'
-import { waitFor } from 'xstate/lib/waitFor'
+import { type StateFrom } from 'xstate'
+import { waitFor } from 'xstate'
 
 export const NHOST_SESSION_KEY = 'nhostSession'
 
@@ -12,7 +12,7 @@ export const getNhost = async (request?: NextRequest) => {
 
   const nhost = new NhostClient({
     subdomain: process.env.NEXT_PUBLIC_NHOST_SUBDOMAIN || 'local',
-    region: process.env.NEXT_PUBLIC_NHOST_REGION,
+    // region: process.env.NEXT_PUBLIC_NHOST_REGION,
     start: false,
     autoRefreshToken: false
   })
@@ -20,6 +20,7 @@ export const getNhost = async (request?: NextRequest) => {
   const sessionCookieValue = $cookies.get(NHOST_SESSION_KEY)?.value || ''
   const initialSession: NhostSession = JSON.parse(atob(sessionCookieValue) || 'null')
 
+  // console.log('nhost', nhost)
   nhost.auth.client.start({ initialSession })
   await waitFor(nhost.auth.client.interpreter!, (state: StateFrom<any>) => !state.hasTag('loading'))
 

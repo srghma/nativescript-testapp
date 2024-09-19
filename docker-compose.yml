@@ -60,8 +60,8 @@ services:
       HASURA_GRAPHQL_LOG_LEVEL: debug
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: "startup, http-log, webhook-log, websocket-log, query-log"
-      HASURA_GRAPHQL_ENABLE_ALLOWLIST: "true"
-      HASURA_GRAPHQL_ENABLE_REMOTE_SCHEMA_PERMISSIONS: "true"
+      HASURA_GRAPHQL_ENABLE_ALLOWLIST: "false"
+      HASURA_GRAPHQL_ENABLE_REMOTE_SCHEMA_PERMISSIONS: "false"
       HASURA_GRAPHQL_CORS_DOMAIN: "*"
       HASURA_GRAPHQL_ENABLED_APIS: "metadata,graphql,pgdump,config"
     volumes:
@@ -82,8 +82,10 @@ services:
       # echo "metadata_directory: metadata" >> config.yaml
       # hasura-cli metadata export
       #
-      # rm -rdf ./hasura-project
-      # docker cp nativescript-testapp-hasura-1:/tmp/hasura-project ./hasura-project
+      # unroot-root-files
+      # rm -rdf ./hasura-project ./nhost-backend/nhost/metadata
+      # docker cp nativescript-testapp-hasura-1:/tmp/hasura-project/metadata ./nhost-backend/nhost/
+      # unroot-root-files
 
       - ./nhost-backend/nhost/migrations:/hasura-migrations
       - ./nhost-backend/nhost/metadata:/hasura-metadata

@@ -1,11 +1,11 @@
 let pageCache = undefined
 
-exports.readPageCache = function() {
+exports.readPageCache = function () {
   return pageCache || []
 }
 
 // registerPage will be called at least once for each page
-exports._setRegisterEventOnPageCacheBus = function(registerPage) {
+exports._setRegisterEventOnPageCacheBus = function (registerPage) {
   if (pageCache) { throw new Error('cannot call _setRegisterEventOnPageCacheBus several times') }
 
   pageCache = window.__PAGE_CACHE_BUS || []
@@ -30,7 +30,7 @@ function hasRel(rel) {
   try {
     var link = document.createElement('link')
     return link.relList.supports(rel)
-  } catch(_) { }
+  } catch (_) { }
 }
 
 // when browser supports both "preload" and "prefetch" - will use "prefetch"
@@ -44,6 +44,6 @@ function hasRel(rel) {
 // IE 11, Edge 12+, nearly all evergreen
 exports.supportedPrefetchRel =
   hasRel('preload') && !hasRel('prefetch')
-    ?  'preload'
+    ? 'preload'
     : 'prefetch'
 

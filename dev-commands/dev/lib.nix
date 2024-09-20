@@ -1,41 +1,48 @@
-{ pkgs }:
+{rootProjectDir}: rec {
+  config = {
+    POSTGRES_HOST = "0.0.0.0";
+    POSTGRES_PORT = 5432;
 
-rec {
-  config =
-    {
-      POSTGRES_HOST = "0.0.0.0";
-      POSTGRES_PORT = 5432;
+    SERVER_HOST = "0.0.0.0";
+    SERVER_PORT = 5000;
 
-      SERVER_HOST = "0.0.0.0";
-      SERVER_PORT = 5000;
+    CLIENT_HOST = "0.0.0.0";
+    CLIENT_PORT = 3000;
+  };
 
-      CLIENT_HOST = "0.0.0.0";
-      CLIENT_PORT = 3000;
-    };
+  migratorEnv = {
+    inherit
+      (import "${rootProjectDir}/config/public/database.nix")
+      DATABASE_NAME
+      ;
 
-  migratorEnv =
-    {
-      inherit (import "${pkgs.rootProjectDir}/config/public/database.nix")
-        DATABASE_NAME;
+    inherit
+      (import "${rootProjectDir}/config/ignored/passwords.nix")
+      DATABASE_OWNER_PASSWORD
+      ;
 
-      inherit (import "${pkgs.rootProjectDir}/config/ignored/passwords.nix")
-        DATABASE_OWNER_PASSWORD;
+    inherit
+      (config)
+      POSTGRES_HOST
+      POSTGRES_PORT
+      ;
+  };
 
-      inherit (config)
-        POSTGRES_HOST
-        POSTGRES_PORT;
-    };
+  serverEnv = {
+    inherit
+      (import "${rootProjectDir}/config/public/database.nix")
+      DATABASE_NAME
+      ;
 
-  serverEnv =
-    {
-      inherit (import "${pkgs.rootProjectDir}/config/public/database.nix")
-        DATABASE_NAME;
+    inherit
+      (import "${rootProjectDir}/config/ignored/passwords.nix")
+      DATABASE_OWNER_PASSWORD
+      ;
 
-      inherit (import "${pkgs.rootProjectDir}/config/ignored/passwords.nix")
-        DATABASE_OWNER_PASSWORD;
-
-      inherit (config)
-        POSTGRES_HOST
-        POSTGRES_PORT;
-    };
+    inherit
+      (config)
+      POSTGRES_HOST
+      POSTGRES_PORT
+      ;
+  };
 }

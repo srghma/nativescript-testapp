@@ -1,24 +1,24 @@
-{ pkgs }:
+{pkgs}: let
+  exportEnvsCommand = attrs: builtins.concatStringsSep "\n" (pkgs.lib.mapAttrsToList (name: value: "export " + name + "=" + builtins.toString value) attrs);
 
-let
+  # # type Name = String
+  # # type Code = String
+  # # Map Name Code -> List { name = String command = String }
+  # to numtide/devshel
+  mkScripts = attrsetOfNamesAndCode: pkgs.lib.attrValues (pkgs.lib.mapAttrs (name: command: {inherit name command;}) attrsetOfNamesAndCode);
 
-config = rec {
-  # type Name = String
-  # type Code = String
-  # Map Name Code -> List Pkg
-  mkScripts = attrsetOfNamesAndCode: pkgs.lib.attrValues (pkgs.lib.mapAttrs (name: code: pkgs.writeShellScriptBin name code) attrsetOfNamesAndCode);
-
-  mkCommand = environment: content: ''
-    set -eux
-
-    ${pkgs.mylib.exportEnvsCommand environment}
-
-    ${content}
-  '';
-};
-
+  mkCommand = environment: content: content;
+  # ''
+  #   set -eux
+  #
+  #   ${exportEnvsCommand environment}
+  #
+  #   ${content}
+  # '';
 in
-
-builtins.concatLists [
-  (import ./dev/default.nix { inherit pkgs config; })
-]
+  mkScripts (
+    import ./dev/default.nix {
+      inherit mkCommand;
+      inherit (pkgs) chromium rootProjectDir;
+    }
+  )

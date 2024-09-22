@@ -10,10 +10,11 @@
     CLIENT_PORT = 3000;
   };
 
-  migratorEnv = {
+  migratorEnv = rec {
     inherit
       (import "${rootProjectDir}/config/public/database.nix")
       DATABASE_NAME
+      DATABASE_SHADOW_NAME
       ;
 
     inherit
@@ -26,6 +27,10 @@
       POSTGRES_HOST
       POSTGRES_PORT
       ;
+
+    DATABASE_URL = "postgres://app_owner:${DATABASE_OWNER_PASSWORD}@${POSTGRES_HOST}:${toString POSTGRES_PORT}/${DATABASE_NAME}";
+    SHADOW_DATABASE_URL = "postgres://app_owner:${DATABASE_OWNER_PASSWORD}@${POSTGRES_HOST}:${toString POSTGRES_PORT}/${DATABASE_SHADOW_NAME}";
+    ROOT_DATABASE_URL = "postgres://postgres:${DATABASE_OWNER_PASSWORD}@${POSTGRES_HOST}:${toString POSTGRES_PORT}/postgres";
   };
 
   serverEnv = {

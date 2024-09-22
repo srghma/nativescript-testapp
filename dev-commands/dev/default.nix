@@ -62,25 +62,33 @@ in {
       dump-schema
   '';
 
+  # export DATABASE_URL=postgres://app_owner:app_owner_pass@0.0.0.0:5432/nextjsdemo
+  # export ROOT_DATABASE_URL=postgres://postgres:app_owner_pass@0.0.0.0:5432/postgres
+  # export SHADOW_DATABASE_URL=postgres://app_owner:app_owner_pass@0.0.0.0:5432/nextjsdemo_shadow
   dev__db__migrate = mkCommand lib.migratorEnv ''
-    waitforit -host=$POSTGRES_HOST -port=$POSTGRES_PORT -timeout=30
+    # waitforit -host=$POSTGRES_HOST -port=$POSTGRES_PORT -timeout=30
+    #
+    # wait-for-postgres --dbname=postgres://app_owner:$DATABASE_OWNER_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$DATABASE_NAME
 
-    wait-for-postgres --dbname=postgres://app_owner:$DATABASE_OWNER_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$DATABASE_NAME
+    # create .gmrc
+    # graphile-migrate init
 
-    # for relative imports using \include command (shimg is using psql internally)
-    cd ./migrations
+    graphile-migrate migrate
 
-    shmig -t postgresql \
-      -m ./ \
-      -C always \
-      -l app_owner \
-      -p $DATABASE_OWNER_PASSWORD \
-      -H $POSTGRES_HOST \
-      -P $POSTGRES_PORT \
-      -d $DATABASE_NAME \
-      migrate
-
-    ${rootProjectDir}/node_modules/.bin/graphile-worker --connection "postgres://app_owner:$DATABASE_OWNER_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$DATABASE_NAME" --schema-only
+    # # for relative imports using \include command (shimg is using psql internally)
+    # cd ./migrations
+    #
+    # shmig -t postgresql \
+    #   -m ./ \
+    #   -C always \
+    #   -l app_owner \
+    #   -p $DATABASE_OWNER_PASSWORD \
+    #   -H $POSTGRES_HOST \
+    #   -P $POSTGRES_PORT \
+    #   -d $DATABASE_NAME \
+    #   migrate
+    #
+    # ${rootProjectDir}/node_modules/.bin/graphile-worker --connection "postgres://app_owner:$DATABASE_OWNER_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$DATABASE_NAME" --schema-only
   '';
 
   # GRAPHILE_LICENSE="${lib.fileContents "${rootProjectDir}/config/ignored/graphile-license"}" \

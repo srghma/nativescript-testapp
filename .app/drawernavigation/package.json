@@ -15,15 +15,15 @@
     "lint": "eslint \"app/**/*.js\""
   },
   "dependencies": {
-    "@nativescript/theme": "~2.3.0",
-    "nativescript-ui-sidedrawer": "~8.0.0",
-    "rxjs": "^6.4.0",
-    "tns-core-modules": "~6.5.0"
+    "@nativescript/theme": "~3.1.0",
+    "nativescript-ui-sidedrawer": "~15.2.3",
+    "rxjs": "^7.8.2",
+    "tns-core-modules": "~6.5.27"
   },
   "devDependencies": {
-    "eslint": "~5.8.0",
-    "nativescript-dev-webpack": "~1.5.0",
-    "node-sass": "^4.7.1"
+    "eslint": "~9.24.0",
+    "nativescript-dev-webpack": "~1.5.1",
+    "node-sass": "^9.0.0"
   },
   "gitHead": "20a65d338ae8f8911087ab6615b89363f864b07b",
   "readme": "NativeScript Application"

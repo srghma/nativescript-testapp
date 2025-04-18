@@ -8,16 +8,22 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    devshell,
-    flake-utils,
-  }:
+  outputs =
     {
-      pkgs = import nixpkgs { config = { }; overlays = [ ]; system = "x86_64-linux"; };
-    } //
-    flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
+      self,
+      nixpkgs,
+      devshell,
+      flake-utils,
+    }:
+    {
+      pkgs = import nixpkgs {
+        config = { };
+        overlays = [ ];
+        system = "x86_64-linux";
+      };
+    }
+    // flake-utils.lib.eachSystem [ "x86_64-linux" ] (
+      system:
       let
         inherit (nixpkgs) lib;
         pkgs = import nixpkgs {
@@ -49,12 +55,27 @@
         devShell = pkgs.devshell.mkShell rec {
           name = "android-project";
           env = with pkgs; [
-            { name = "ANDROID_HOME"; value = ANDROID_HOME; }
-            { name = "ANDROID_SDK_ROOT"; value = ANDROID_HOME;}
-            { name = "GRADLE_OPTS"; value = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${ANDROID_HOME}/build-tools/${buildToolsVersion}/aapt2";}
-            { name = "JAVA_HOME"; value = jdk.home; }
-            { name = "NATIVESCRIPT_ANDROID_STUDIO_PATH"; eval = "$(which android-studio)"; }
-            { name = "PATH"; prefix = "/home/srghma/projects/nativescript-cli/bin/"; }
+            {
+              name = "ANDROID_HOME";
+              value = ANDROID_HOME;
+            }
+            {
+              name = "ANDROID_SDK_ROOT";
+              value = ANDROID_HOME;
+            }
+            {
+              name = "GRADLE_OPTS";
+              value = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${ANDROID_HOME}/build-tools/${buildToolsVersion}/aapt2";
+            }
+            {
+              name = "JAVA_HOME";
+              value = jdk.home;
+            }
+            {
+              name = "NATIVESCRIPT_ANDROID_STUDIO_PATH";
+              eval = "$(which android-studio)";
+            }
+            # { name = "PATH"; prefix = "/home/srghma/projects/nativescript-cli/bin/"; }
           ];
           packages = with pkgs; [
             arion
